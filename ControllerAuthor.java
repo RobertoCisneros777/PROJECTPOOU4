@@ -139,7 +139,7 @@ class ControllerAuthor implements Controller {
             }
             Menu.printOptions(optionsAuthors);
             ConsoleReader reader = new ConsoleReader();
-            IntValidator validatorOption = value -> value < optionsAuthors.size();
+            IntValidator validatorOption = value -> value < optionsAuthors.size() + 1;
             opcAuthor = reader.readInteger(">SELECCIONA OPCION", validatorOption);
             if (opcAuthor >= 1 && opcAuthor <= optionsAuthors.size()) {
                 String selectedOptionAuthor = optionsAuthors.get(opcAuthor - 1);

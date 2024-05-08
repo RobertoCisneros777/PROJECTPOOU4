@@ -175,7 +175,7 @@ class ControllerBook implements Controller {
             }
             Menu.printOptions(optionsBook);
             ConsoleReader reader = new ConsoleReader();
-            IntValidator validatorOption = value -> value < optionsBook.size();
+            IntValidator validatorOption = value -> value < optionsBook.size() + 1;
             opcBook = reader.readInteger(">SELECCIONA OPCION", validatorOption);
             if (opcBook >= 1 && opcBook <= optionsBook.size()) {
                 String selectedOption = optionsBook.get(opcBook - 1);

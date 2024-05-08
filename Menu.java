@@ -64,10 +64,11 @@ class Menu implements Controller {
                     opcSuperAdmin = reader.readInteger(">SELECCIONA OPCION", validator);
                     if (opcSuperAdmin == 6) {
                         ControllerUser.login();
+                    }if(opcSuperAdmin != 7) {
+                        MenuOption menuOption = menuItems.get(opcSuperAdmin);
+                        menuOption.getController().execute(user);
                     }
-                    MenuOption menuOption = menuItems.get(opcSuperAdmin);
-                    menuOption.getController().execute(user);
-                } while (opcSuperAdmin != 6 && opcSuperAdmin != 7);
+                }while (opcSuperAdmin != 6 && opcSuperAdmin != 7);
             }else{
                 menuItems.clear();
                 int opcAdmin;
@@ -91,8 +92,10 @@ class Menu implements Controller {
                     if (opcAdmin == 5) {
                         ControllerUser.login();
                     }
-                    MenuOption menuOption = menuItems.get(opcAdmin);
-                    menuOption.getController().execute(user);
+                    if (opcAdmin != 6){
+                        MenuOption menuOption = menuItems.get(opcAdmin);
+                        menuOption.getController().execute(user);
+                    }
                 } while (opcAdmin != 5 && opcAdmin != 6);
             }
         }

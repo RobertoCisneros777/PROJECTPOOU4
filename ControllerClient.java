@@ -106,7 +106,7 @@ import java.util.Scanner;
         }
         for (int j = 0; j < ControllerUser.users.size(); j++){
             if (ControllerUser.users.get(j).getProfile().equals(updateClients.get(updateIndex - 1).profile)){
-                ControllerUser.users.set(i, updateClients.get(updateIndex - 1));
+                ControllerUser.users.set(j, updateClients.get(updateIndex - 1));
             }
         }
         updateClients.clear();
@@ -143,7 +143,7 @@ import java.util.Scanner;
                 }
                 Menu.printOptions(options);
                 ConsoleReader reader = new ConsoleReader();
-                IntValidator validatorOption = value -> value < options.size();
+                IntValidator validatorOption = value -> value < options.size() + 1;
                 opcClient = reader.readInteger(">SELECCIONA OPCION", validatorOption);
                 if (opcClient >= 1 && opcClient <= options.size()) {
                     String selectedOption = options.get(opcClient - 1);

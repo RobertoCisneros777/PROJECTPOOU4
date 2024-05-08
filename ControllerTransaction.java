@@ -305,7 +305,7 @@ import java.util.UUID;
                 }
                 Menu.printOptions(optionsTransaction);
                 ConsoleReader reader = new ConsoleReader();
-                IntValidator validatorOption = value -> value < optionsTransaction.size();
+                IntValidator validatorOption = value -> value < optionsTransaction.size() + 1;
                 opc = reader.readInteger(">SELECCIONA OPCION", validatorOption);
                 if (opc >= 1 && opc <= optionsTransaction.size()) {
                     String selectedOption = optionsTransaction.get(opc - 1);
