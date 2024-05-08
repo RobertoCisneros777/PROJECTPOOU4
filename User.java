@@ -4,20 +4,17 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
-class User {
+abstract class User {
     private Profile profile;
     private String userName;
     private String password;
-
     public User(Profile profile, String userName, String password) {
         this.profile = profile;
         this.userName = userName;
         this.password = hashString(password);
     }
-
     public User() {
     }
-
     public void setPassword(String password) {
         this.password = hashString(password);
     }
@@ -41,7 +38,6 @@ class User {
     public void setProfile(Profile profile) {
         this.profile = profile;
     }
-
     public static String hashString(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
@@ -61,7 +57,6 @@ class User {
             return null;
         }
     }
-
     public boolean checkPassword(String inputPassword) {
         return Objects.equals(hashString(inputPassword), getPassword());
     }

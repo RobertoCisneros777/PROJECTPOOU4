@@ -7,24 +7,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
-class ControllerBook {
+class ControllerBook implements Controller {
     static ArrayList<Book> books = new ArrayList<>();
     static ArrayList <Book> borrowedBooks = new ArrayList<>();
-    public static void addBook(Book book){
-        books.add(book);
-    }
     public static void createBook() throws ParseException {
         Book book = new Book();
-        System.out.print(">INGRESE EL ISBN: ");
-        Scanner isb = new Scanner(System.in);
-        String isbn = isb.nextLine();
+        ConsoleReader reader = new ConsoleReader();
+        StringValidator isbnValidator = value -> value.matches("\\d+");
+        String isbn = reader.readString(">INGRESE EL ISBN", isbnValidator);
         book.setIsbn(isbn);
-
         System.out.print(">INGRESE EL TITULO: ");
         Scanner titl = new Scanner(System.in);
         String title = titl.nextLine();
         book.setTitle(title);
-
         for (int i = 0; i < ControllerAuthor.authors.size(); i++) {
             System.out.println((i + 1) + ") " + ControllerAuthor.authors.get(i).profile.name);
         }
@@ -45,7 +40,7 @@ class ControllerBook {
         Date publishDate = new SimpleDateFormat("dd/MM/yyyy").parse(publishdat);
         book.setPublishDate(publishDate);
         book.setAvailable(true);
-        ControllerBook.addBook(book);
+        ControllerBook.books.add(book);
         System.out.println(">LIBRO CREADO CON ÉXITO");
     }
     public static void deleteBook() {
@@ -82,10 +77,9 @@ class ControllerBook {
         opc = leer.nextInt();
         switch (opc) {
             case 1 -> {
-                System.out.print(">INGRESE EL NUEVO ISBN: ");
-                String newIsbn;
-                Scanner ni = new Scanner(System.in);
-                newIsbn = ni.nextLine();
+                ConsoleReader reader = new ConsoleReader();
+                StringValidator isbnValidator = value -> value.matches("\\d+");
+                String newIsbn = reader.readString(">INGRESE EL NUEVO ISBN", isbnValidator);
                 ControllerBook.updateBookIsbn(editIndex, newIsbn);
             }
             case 2 -> {
@@ -106,13 +100,13 @@ class ControllerBook {
         }
     }
     public static void updateBookIsbn(int editIndex, String isbn) {
-        books.get(editIndex-1).isbn=isbn;
+        books.get(editIndex - 1).isbn = isbn;
     }
     public static void updateBookTitle(int editIndex, String title){
-        books.get(editIndex-1).title=title;
+        books.get(editIndex - 1).title = title;
     }
     public static void updateBookPublishDate(int editIndex, Date publishDate){
-        books.get(editIndex-1).publishDate=publishDate;
+        books.get(editIndex - 1).publishDate = publishDate;
     }
     public static void readerAllBooks(){
         System.out.printf("| %-50s | %-20s | %-10s | %-20s |%n", "TITULO", "AUTOR", "ISBN", "FECHA DE PUBLICACION");
@@ -148,5 +142,73 @@ class ControllerBook {
                         new SimpleDateFormat("dd/MM/yyyy").format(book.publishDate));
             }
         }
+    }
+
+    @Override
+    public void execute(User user) throws ParseException {
+        ArrayList<String> optionsBook = new ArrayList<>();
+        int opcBook;
+        do {
+            System.out.println();
+            System.out.println("-MENU LIBROS- ");
+            System.out.println();
+            System.out.println(">¿QUE DESEA HACER?");
+            optionsBook.clear();
+            if (((Administrator) user).isIsSuperAdmin() || ((Administrator) user).permissions.contains(Permissions.READ) && ((Administrator) user).permissions.contains(Permissions.DELETE) && ((Administrator) user).permissions.contains(Permissions.WRITE)) {
+                optionsBook.add("AÑADIR LIBRO");
+                optionsBook.add("EDITAR LIBRO");
+                optionsBook.add("MOSTRAR LIBROS");
+                optionsBook.add("ELIMINAR LIBRO");
+                optionsBook.add("SALIR DEL MENU LIBROS");
+            } else {
+                if (((Administrator) user).permissions.contains(Permissions.WRITE)) {
+                    optionsBook.add("AÑADIR LIBRO");
+                    optionsBook.add("EDITAR LIBRO");
+                }
+                if (((Administrator) user).permissions.contains(Permissions.READ)) {
+                    optionsBook.add("MOSTRAR LIBROS");
+                }
+                if (((Administrator) user).permissions.contains(Permissions.DELETE)) {
+                    optionsBook.add("ELIMINAR LIBRO");
+                }
+                optionsBook.add("SALIR DEL MENU LIBROS");
+            }
+            Menu.printOptions(optionsBook);
+            ConsoleReader reader = new ConsoleReader();
+            IntValidator validatorOption = value -> value < optionsBook.size();
+            opcBook = reader.readInteger(">SELECCIONA OPCION", validatorOption);
+            if (opcBook >= 1 && opcBook <= optionsBook.size()) {
+                String selectedOption = optionsBook.get(opcBook - 1);
+                switch (selectedOption) {
+                    case "AÑADIR LIBRO" -> {
+                        System.out.println();
+                        createBook();
+                    }
+                    case "EDITAR LIBRO" -> {
+                        System.out.println();
+                        updateBook();
+                    }
+                    case "MOSTRAR LIBROS" -> {
+                        System.out.println();
+                        System.out.println("\n>1) MOSTRAR TODOS LOS LIBROS \n>2) MOSTRAR LIBROS PRESTADOS \n>3) MOSTRAR LIBROS DISPONIBLES PARA PRESTAMO");
+                        IntValidator validatorPrintBooks = value -> value < 4;
+                        int readerOption = reader.readInteger(">SELECCIONE OPCION", validatorPrintBooks);
+                        if (readerOption == 1) {
+                            readerAllBooks();
+                        }else if (readerOption == 2){
+                            readerBorrowedBooks();
+                        }else if (readerOption == 3){
+                            readerAvailableBooks();
+                        }
+                    }
+                    case "ELIMINAR LIBRO" -> {
+                        System.out.println();
+                        deleteBook();
+                    }
+                }
+            } else {
+                System.out.println("OPCION NO VALIDA");
+            }
+        } while (!optionsBook.get(opcBook - 1).equals("SALIR DEL MENU LIBROS"));
     }
 }

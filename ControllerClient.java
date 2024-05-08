@@ -6,11 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-    class ControllerClient {
-    static ArrayList<Client> clients = new ArrayList<>();
+    class ControllerClient implements Controller {
     public static void createClient () throws ParseException {
         Profile profile;
-        Client client;
         System.out.print(">INGRESE NOMBRE DEL CLIENTE: ");
         Scanner addClient = new Scanner(System.in);
         String name = addClient.nextLine();
@@ -19,53 +17,59 @@ import java.util.Scanner;
         System.out.print(">INGRESE FECHA DE NACIMIENTO CON EL SIGUIENTE FORMATO DD/MM/YYYY: ");
         String birthDate = addClient.nextLine();
         profile = new Profile(name, lastName, birthDate);
-        client = new Client (profile);
         ControllerUser.createClientUser(profile);
-        ControllerClient.addClients(client);
-    }
-    public static void addClients(Client client) {
-        clients.add(client);
     }
     public static void readerAvailableClients(){
-        for (int i = 0; i < clients.size(); i++) {
-            if (clients.get(i).profile != null && clients.get(i).borrowedBooks.size() < 3){
-                System.out.println(">CLIENTE " + (i + 1) + " " + clients.get(i).profile.name + " " + clients.get(i).profile.lastName);
-            }
-        }
-    }
-    public static void readerClientsBooksBorrowed(){
-        for (int i = 0; i < clients.size(); i++) {
-            System.out.println(">CLIENTE " + (i + 1) + " " + clients.get(i).profile.name + " " + clients.get(i).profile.lastName);
-            if (clients.get(i).borrowedBooks.isEmpty()) {
-                System.out.println(">LIBROS PRESTADOS: 0");
-            } else {
-                System.out.println(">LIBROS PRESTADOS:");
-                for (int k = 0; k < clients.get(i).borrowedBooks.size(); k++) {
-                    System.out.println(clients.get(i).borrowedBooks.get(k).title);
+        System.out.printf("| %-20s |%n", "CLIENTE");
+        for (int i = 0; i < ControllerUser.users.size(); i++) {
+            if (ControllerUser.users.get(i) instanceof Client){
+                if (ControllerUser.users.get(i).getProfile() != null && ((Client) ControllerUser.users.get(i)).borrowedBooks.size() < 3){
+                    System.out.printf("| %-20s |%n", ControllerUser.users.get(i).getProfile().name);
                 }
             }
         }
     }
-    public static void readerClients() {
-        for (int i = 0; i < clients.size(); i++) {
-            System.out.println(">CLIENTE " + (i + 1) + " " + clients.get(i).profile.name + " " + clients.get(i).profile.lastName);
+    public static void readerClientsBooksBorrowed(){
+        System.out.printf("| %-20s | | %-17s |%n", "CLIENTE", "LIBROS PRESTADOS");
+        for (int i = 0; i < ControllerUser.users.size(); i++) {
+            if (ControllerUser.users.get(i) instanceof Client) {
+                System.out.printf("| %-20s | | %-17s |%n", ControllerUser.users.get(i).getProfile().name, (((Client) ControllerUser.users.get(i)).borrowedBooks.size()));
+            }
         }
     }
     public static void deleteClient() {
         int deletedIndex;
-        ControllerClient.readerClients();
+        ArrayList <Client> clients1 = new ArrayList<>();
+        ControllerTransaction.fillClient(clients1);
         System.out.print(">¿QUE CLIENTE DESEA ELIMINAR?: ");
         Scanner deletedClient = new Scanner(System.in);
         deletedIndex = deletedClient.nextInt();
-        if (clients.get(deletedIndex - 1).borrowedBooks.isEmpty()) {
-            clients.remove(deletedIndex);
+        if (clients1.get(deletedIndex - 1).borrowedBooks.isEmpty()) {
+            for (int i = 0; i < ControllerUser.users.size(); i++) {
+                if (ControllerUser.users.get(i).getProfile().equals(clients1.get(deletedIndex - 1).profile)){
+                    ControllerUser.users.remove(i);
+                    break;
+                }
+            }
+            System.out.println(">CLIENTE ELIMINADO CON EXITO");
         }else{
             System.out.println(">NO PUEDES ELIMINAR UN CLIENTE CON LIBROS PRESTADOS");
         }
     }
     public static void updateClient() throws ParseException {
+        ArrayList <Client> updateClients = new ArrayList<>();
         Scanner updateClient = new Scanner(System.in);
-        ControllerClient.readerClients();
+        int i = 0;
+        while (i < ControllerUser.users.size()) {
+            if (ControllerUser.users.get(i) instanceof Client){
+                updateClients.add((Client) ControllerUser.users.get(i));
+            }
+            i++;
+        }
+        System.out.printf("| %-20s |%n", "CLIENTE");
+        for (Client client : updateClients) {
+            System.out.printf("| %-20s |%n", client.profile.name);
+        }
         System.out.print(">¿QUE CLIENTE DESEAS EDITAR?: ");
         int updateIndex = updateClient.nextInt();
         System.out.println(">¿QUE DESEAS EDITAR DEL CLIENTE?");
@@ -76,33 +80,94 @@ import java.util.Scanner;
         switch (opcClient){
             case 1 -> {
                 System.out.print(">INGRESE EL NUEVO NOMBRE: ");
-                clients.get(updateIndex - 1).profile.name = updateClient.nextLine();
+                updateClients.get(updateIndex - 1).profile.name = updateClient.nextLine();
                 System.out.println(">NOMBRE EDITADO CORRECTAMENTE");
             }
             case 2 -> {
                 System.out.print(">INGRESE EL NUEVO APELLIDO: ");
-                clients.get(updateIndex - 1).profile.lastName = updateClient.nextLine();
+                updateClients.get(updateIndex - 1).profile.lastName = updateClient.nextLine();
                 System.out.println(">APELLIDO EDITADO CORRECTAMENTE");
             }
             case 3 -> {
                 System.out.print(">INGRESE LA NUEVA FECHA DE NACIMIENTO CON EL SIGUIENTE FORMATO: DD/MM/YYYY: ");
                 String newBirthdate = updateClient.nextLine();
                 DateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-                clients.get(updateIndex - 1).profile.birthdate = format.parse(newBirthdate);
+                updateClients.get(updateIndex - 1).profile.birthdate = format.parse(newBirthdate);
                 System.out.println("FECHA DE NACIMIENTO MODIFICADA CORRECTAMENTE");
             }
             case 4 -> {
-                System.out.print(">INGRESE EL NUEVO NOMBRE DE USUARIO: ");
-                String newUserName = updateClient.nextLine();
-                clients.get(updateIndex - 1).setUserName(newUserName);
+                updateClients.get(updateIndex - 1).setUserName(ControllerUser.validUserName());
                 System.out.println(">NOMBRE DE USUARIO EDITADO CORRECTAMENTE");
             }
             case 5 -> {
-                System.out.print(">INGRESE LA NUEVA CONTRASEÑA: ");
-                String newPassword = updateClient.nextLine();
-                clients.get(updateIndex - 1).setPassword(newPassword);
+                updateClients.get(updateIndex - 1).setPassword(ControllerUser.validPassword());
                 System.out.println(">CONTRASEÑA EDITADA CORRECTAMENTE");
             }
         }
+        for (int j = 0; j < ControllerUser.users.size(); j++){
+            if (ControllerUser.users.get(j).getProfile().equals(updateClients.get(updateIndex - 1).profile)){
+                ControllerUser.users.set(i, updateClients.get(updateIndex - 1));
+            }
+        }
+        updateClients.clear();
     }
-}
+
+        @Override
+        public void execute(User user) throws ParseException {
+            ArrayList<String> options = new ArrayList<>();
+            int opcClient;
+            do {
+                System.out.println();
+                System.out.println("-MENU CLIENTES-");
+                System.out.println();
+                System.out.println(">¿QUE DESEA HACER?");
+                options.clear();
+                if (((Administrator) user).isIsSuperAdmin() || ((Administrator) user).permissions.contains(Permissions.READ) && ((Administrator) user).permissions.contains(Permissions.DELETE) && ((Administrator) user).permissions.contains(Permissions.WRITE)) {
+                    options.add("AÑADIR CLIENTE");
+                    options.add("EDITAR CLIENTE");
+                    options.add("MOSTRAR CLIENTES");
+                    options.add("ELIMINAR CLIENTE");
+                    options.add("SALIR DEL MENU CLIENTES");
+                } else {
+                    if (((Administrator) user).permissions.contains(Permissions.WRITE)) {
+                        options.add("AÑADIR CLIENTE");
+                        options.add("EDITAR CLIENTE");
+                    }
+                    if (((Administrator) user).permissions.contains(Permissions.READ)) {
+                        options.add("MOSTRAR CLIENTES");
+                    }
+                    if (((Administrator) user).permissions.contains(Permissions.DELETE)) {
+                        options.add("ELIMINAR CLIENTE");
+                    }
+                    options.add("SALIR DEL MENU CLIENTES");
+                }
+                Menu.printOptions(options);
+                ConsoleReader reader = new ConsoleReader();
+                IntValidator validatorOption = value -> value < options.size();
+                opcClient = reader.readInteger(">SELECCIONA OPCION", validatorOption);
+                if (opcClient >= 1 && opcClient <= options.size()) {
+                    String selectedOption = options.get(opcClient - 1);
+                    switch (selectedOption) {
+                        case "AÑADIR CLIENTE" -> {
+                            System.out.println();
+                            createClient();
+                        }
+                        case "EDITAR CLIENTE" -> {
+                            System.out.println();
+                            updateClient();
+                        }
+                        case "MOSTRAR CLIENTES" -> {
+                            System.out.println();
+                            readerClientsBooksBorrowed();
+                        }
+                        case "ELIMINAR CLIENTE" -> {
+                            System.out.println();
+                            deleteClient();
+                        }
+                    }
+                } else {
+                    System.out.println("OPCION NO VALIDA");
+                }
+            } while (!options.get(opcClient - 1).equals("SALIR DEL MENU CLIENTES"));
+        }
+    }

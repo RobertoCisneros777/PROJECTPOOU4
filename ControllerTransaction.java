@@ -7,12 +7,9 @@ import java.util.Date;
 import java.util.Scanner;
 import java.util.UUID;
 
-    class ControllerTransaction {
+    class ControllerTransaction implements  Controller{
     static ArrayList <Transaction> allTransactions= new ArrayList <> ();
     static UUID uuid = UUID.randomUUID();
-    public static void addTransaction(Transaction transaction){
-        allTransactions.add(transaction);
-    }
     public static void reportMovementUserClient(User user) throws ParseException {
         int opc;
         Scanner opctransac = new Scanner(System.in);
@@ -23,13 +20,14 @@ import java.util.UUID;
         switch (opc){
             case 1 -> {
                 boolean flag = false;
+                System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", "CLIENTE", "LIBRO", "TIPO DE TRANSACCION", "FECHA");
                 for (Transaction allTransaction : allTransactions) {
                     if (allTransaction.client.profile.equals(user.getProfile())) {
                         if (allTransaction.type.equals("PRESTAMO")) {
-                            System.out.println("EL LIBRO " + allTransaction.book.title + " FUE PRESTADO AL CLIENTE " + allTransaction.client.profile.name + " EN LA FECHA " + new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
+                            System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", allTransaction.client.profile.name, allTransaction.book.title, allTransaction.type, new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
                             flag = true;
                         } else if (allTransaction.type.equals("DEVOLUCION")) {
-                            System.out.println("EL LIBRO " + allTransaction.book.title + " FUE DEVUELTO POR EL CLIENTE " + allTransaction.client.profile.name + " EN LA FECHA " + new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
+                            System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", allTransaction.client.profile.name, allTransaction.book.title, allTransaction.type, new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
                             flag = true;
                         }
                     }
@@ -61,14 +59,15 @@ import java.util.UUID;
                     if (allTransactions.isEmpty()) {
                         System.out.println(">NO HAY TRANSACCIONES DISPONIBLES");
                     } else {
+                        System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", "CLIENTE", "LIBRO", "TIPO DE TRANSACCION", "FECHA");
                         for (Transaction transaction : allTransactions) {
                             Date transactionDate = transaction.date;
                             if (transactionDate.compareTo(startDate1) >= 0 && transactionDate.compareTo(endDate1) <= 0) {
                                 if (transaction.type.equals("PRESTAMO") && transaction.client.profile.equals(user.getProfile())) {
-                                    System.out.println("EL LIBRO " + transaction.book.title + " FUE PRESTADO AL CLIENTE " + transaction.client.profile.name + " EN LA FECHA " + dateFormat.format(transactionDate));
+                                    System.out.printf("|%-20s | %-40s | %-20s | %-10s |%n", transaction.client.profile.name, transaction.book.title, transaction.type, new SimpleDateFormat("dd/MM/yyyy").format(transaction.date));
                                     banner = true;
                                 } else if (transaction.type.equals("DEVOLUCION") && transaction.client.profile.equals(user.getProfile())) {
-                                    System.out.println("EL LIBRO " + transaction.book.title + " FUE DEVUELTO POR EL CLIENTE " + transaction.client.profile.name + " EN LA FECHA " + dateFormat.format(transactionDate));
+                                    System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", transaction.client.profile.name, transaction.book.title, transaction.type, new SimpleDateFormat("dd/MM/yyyy").format(transaction.date));
                                     banner = true;
                                 }
                             }
@@ -96,7 +95,8 @@ import java.util.UUID;
                 reportMovementBook(movementBook);
             }
             case 2 -> {
-                ControllerClient.readerClients();
+                ArrayList <Client> clients = new ArrayList<>();
+                fillClient(clients);
                 System.out.print(">¿DE QUE CLIENTE DESEA VER LOS MOVIMIENTOS REALIZADOS?: ");
                 int movementClient = opctransac.nextInt();
                 reportMovementClient(movementClient);
@@ -111,7 +111,20 @@ import java.util.UUID;
             }
         }
     }
-    public static void reportMovementBook(int movementBook) {
+
+        static void fillClient(ArrayList<Client> clients) {
+            for (int i = 0; i < ControllerUser.users.size(); i++){
+                if (ControllerUser.users.get(i) instanceof Client){
+                    clients.add((Client) ControllerUser.users.get(i));
+                }
+            }
+            System.out.printf("| %-20s |%n", "CLIENTE");
+            for (Client client : clients) {
+                System.out.printf("| %-20s |%n", client.profile.name);
+            }
+        }
+
+        public static void reportMovementBook(int movementBook) {
         boolean banner = false;
         Book book = ControllerBook.books.get(movementBook - 1);
         for (Transaction transaction : allTransactions){
@@ -123,20 +136,24 @@ import java.util.UUID;
         if (!banner) {
             System.out.println(">EL LIBRO NO TIENE TRANSACCIONES POR EL MOMENTO");
         } else{
+            System.out.printf("| %-20s | %-40s | %-10s | %-20s |%n", "CLIENTE", "LIBRO", "TIPO DE TRANSACCION", "FECHA");
             for (Transaction allTransaction : allTransactions) {
                 if (allTransaction.book.isbn.equals(book.isbn) && allTransaction.type.equals("PRESTAMO")) {
-                    System.out.println("EL LIBRO " + book.title + " FUE PRESTADO AL CLIENTE " + allTransaction.client.profile.name + " EN LA FECHA " + new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
+                    System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", allTransaction.client.profile.name, allTransaction.book.title, allTransaction.type, new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
+                    System.out.println();
                 } else if (allTransaction.book.isbn.equals(book.isbn) && allTransaction.type.equals("DEVOLUCION")) {
-                    System.out.println("EL LIBRO " + book.title + " FUE DEVUELTO POR EL CLIENTE " + allTransaction.client.profile.name + " EN LA FECHA " + new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
+                    System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", allTransaction.client.profile.name, allTransaction.book.title, allTransaction.type, new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
+                    System.out.println();
                 }
             }
         }
     }
     public static void reportMovementClient (int movementClient){
         boolean bannerClient = false;
-        Client client = ControllerClient.clients.get(movementClient -1);
+        ArrayList <Client> reportClient = new ArrayList<>();
+        fillClient(reportClient);
         for (Transaction transaction : allTransactions){
-            if (transaction.client.profile.equals(client.profile)) {
+            if (transaction.client.profile.equals(reportClient.get(movementClient - 1).profile)) {
                 bannerClient = true;
                 break;
             }
@@ -144,13 +161,10 @@ import java.util.UUID;
         if(!bannerClient){
             System.out.println(">EL CLIENTE NO TIENE TRANSACCIONES POR EL MOMENTO");
         }else{
+            System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", "CLIENTE", "LIBRO", "TIPO DE TRANSACCION", "FECHA");
             for (Transaction allTransaction : allTransactions) {
-                if (allTransaction.client.profile.equals(client.profile)) {
-                    if (allTransaction.type.equals("PRESTAMO")) {
-                        System.out.println("EL LIBRO " + allTransaction.book.title + " FUE PRESTADO AL CLIENTE " + allTransaction.client.profile.name + " EN LA FECHA " + new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
-                    } else if (allTransaction.type.equals("DEVOLUCION")) {
-                        System.out.println("EL LIBRO " + allTransaction.book.title + " FUE DEVUELTO POR EL CLIENTE " + allTransaction.client.profile.name + " EN LA FECHA " + new SimpleDateFormat("dd/MM/yyyy").format(allTransaction.date));
-                    }
+                if (allTransaction.client.profile.equals(reportClient.get(movementClient - 1).profile)) {
+                    printTransaction(allTransaction);
                 }
             }
         }
@@ -162,32 +176,38 @@ import java.util.UUID;
         if (allTransactions.isEmpty()) {
             System.out.println(">NO HAY TRANSACCIONES DISPONIBLES");
         }else {
+            System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", "CLIENTE", "LIBRO", "TIPO DE TRANSACCION", "FECHA");
             for (Transaction transaction : allTransactions) {
                 Date transactionDate = transaction.date;
                 if (transactionDate.compareTo(startDate) >= 0 && transactionDate.compareTo(endDate) <= 0) {
-                    if (transaction.type.equals("PRESTAMO")) {
-                        System.out.println("EL LIBRO " + transaction.book.title + " FUE PRESTADO AL CLIENTE " + transaction.client.profile.name + " EN LA FECHA " + dateFormat.format(transactionDate));
-                    } else if (transaction.type.equals("DEVOLUCION")) {
-                        System.out.println("EL LIBRO " + transaction.book.title + " FUE DEVUELTO POR EL CLIENTE " + transaction.client.profile.name + " EN LA FECHA " + dateFormat.format(transactionDate));
-                    }
+                    printTransaction(transaction);
                 }
             }
         }
     }
-    public static void borrowedBook() throws ParseException {
+
+        private static void printTransaction(Transaction transaction) {
+            if (transaction.type.equals("PRESTAMO")) {
+                System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", transaction.client.profile.name, transaction.book.title, transaction.type, new SimpleDateFormat("dd/MM/yyyy").format(transaction.date));
+            } else if (transaction.type.equals("DEVOLUCION")) {
+                System.out.printf("| %-20s | %-40s | %-20s | %-10s |%n", transaction.client.profile.name, transaction.book.title, transaction.type, new SimpleDateFormat("dd/MM/yyyy").format(transaction.date));
+            }
+        }
+
+        public static void borrowedBook() throws ParseException {
+        ArrayList <Client> availableClient = new ArrayList<>();
         System.out.println(">CLIENTES DISPONIBLES");
         ControllerClient.readerAvailableClients();
         System.out.println(">¿A QUÉ CLIENTE DESEA PRESTARLO?");
         Scanner opcpcc = new Scanner(System.in);
         int clientIndex = opcpcc.nextInt();
-        Client selectedClient = ControllerClient.clients.get(clientIndex - 1);
-        System.out.println(">LIBROS DISPONIBLES");
+        System.out.printf(" | %-30s |%n ", "LIBROS DISPONIBLES");
         ArrayList<Book> availableBooks = new ArrayList<>();
         for (int i = 0; i < ControllerBook.books.size(); i++) {
             Book book = ControllerBook.books.get(i);
             if (book.getAvailable()) {
                 availableBooks.add(book);
-                System.out.printf("%d %s BY %s\n", availableBooks.size(), book.title, book.author.profile.name + " " + book.author.profile.lastName);
+                System.out.printf(" | %-30s |%n ", book.title);
             }
         }
         System.out.println(">¿QUÉ LIBRO DESEA PRESTAR?");
@@ -196,33 +216,38 @@ import java.util.UUID;
         if (bookIndex > 0 && bookIndex <= availableBooks.size()) {
             Book selectedBook = availableBooks.get(bookIndex - 1);
             selectedBook.setAvailable(false);
-            selectedClient.borrowedBooks.add(selectedBook);
-            System.out.println(">LIBRO PRESTADO CON EXITO A " + selectedClient.profile.name + " " + selectedClient.profile.lastName);
+            for (int i = 0; i < ControllerUser.users.size(); i++) {
+                if (ControllerUser.users.get(i) instanceof Client && ((Client) ControllerUser.users.get(i)).borrowedBooks.size() < 3){
+                    availableClient.add((Client) ControllerUser.users.get(i));
+                }
+            }
+            availableClient.get(clientIndex - 1).borrowedBooks.add(selectedBook);
+            System.out.println(">LIBRO PRESTADO CON EXITO A " + availableClient.get(clientIndex - 1).profile.name + " " + availableClient.get(clientIndex - 1).profile.lastName);
             Date currentDate = new Date();
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             String formattedDate = dateFormat.format(currentDate);
-            Transaction transaction = new Transaction(uuid.toString(), "PRESTAMO", selectedClient, selectedBook, formattedDate);
-            addTransaction(transaction);
-        } else if (ControllerClient.clients.get(clientIndex - 1).borrowedBooks.size() > 3) {
+            Transaction transaction = new Transaction(uuid.toString(), "PRESTAMO", availableClient.get(clientIndex - 1), selectedBook, formattedDate);
+            allTransactions.add(transaction);
+        } else if (availableClient.get(clientIndex - 1).borrowedBooks.size() > 3) {
             System.out.println(">NO SE PUEDE PRESTAR MAS DE 3 LIBROS A UNA PERSONA");
         } else {
             System.out.println(">EL INDICE DEL LIBRO SELECCIONADO NO ES VALIDO");
         }
     }
     public static void returnBook() throws ParseException {
-        System.out.println(">CLIENTES CON LIBROS PRESTADOS");
-        for (int i = 0; i < ControllerClient.clients.size(); i++) {
-            Client client = ControllerClient.clients.get(i);
-            if (!client.borrowedBooks.isEmpty()) {
-                System.out.println((i + 1) + " " + client.profile.name + " " + client.profile.lastName);
+        System.out.printf(" | %-20s |%n ", "CLIENTES CON LIBROS PRESTADOS");
+        ArrayList <Client> clientsWithBooks = new ArrayList<>();
+        for (int i = 0; i < ControllerUser.users.size(); i++) {
+            if (ControllerUser.users.get(i) instanceof Client && ((Client) ControllerUser.users.get(i)).borrowedBooks.size() < 3){
+                System.out.printf(" | %-20s |%n ", ControllerUser.users.get(i).getProfile().name);
+                clientsWithBooks.add((Client) ControllerUser.users.get(i));
             }
         }
         System.out.println(">¿QUÉ CLIENTE VA A DEVOLVER EL LIBRO?");
         Scanner opccdd = new Scanner(System.in);
         int clientIndexToReturn = opccdd.nextInt();
-
-        if (clientIndexToReturn > 0 && clientIndexToReturn <= ControllerClient.clients.size()) {
-            Client selectedClientToReturn = ControllerClient.clients.get(clientIndexToReturn - 1);
+        if (clientIndexToReturn > 0 && clientIndexToReturn <= clientsWithBooks.size()) {
+            Client selectedClientToReturn = clientsWithBooks.get(clientIndexToReturn - 1);
             ArrayList<Book> borrowedBooks = selectedClientToReturn.borrowedBooks;
             if (!borrowedBooks.isEmpty()) {
                 System.out.println(">LIBROS PRESTADOS DE " + selectedClientToReturn.profile.name + " " + selectedClientToReturn.profile.lastName);
@@ -242,7 +267,7 @@ import java.util.UUID;
                     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
                     String formattedDate = dateFormat.format(currentDate);
                     Transaction transaction2 = new Transaction (uuid.toString(), "DEVOLUCION", selectedClientToReturn, selectedBookToReturn, formattedDate);
-                    addTransaction(transaction2);
+                    allTransactions.add(transaction2);
                 } else {
                     System.out.println(">EL INDICE DEL LIBRO SELECCIONADO NO ES VALIDO");
                 }
@@ -251,4 +276,56 @@ import java.util.UUID;
             System.out.println(">EL INDICE DEL CIENTE SELECCIONADO NO ES VALIDO");
         }
     }
-}
+
+        @Override
+        public void execute(User user) throws ParseException {
+            ArrayList <String> optionsTransaction = new ArrayList<>();
+            int opc;
+            do {
+                System.out.println();
+                System.out.println("-MENU TRANSACCIONES-");
+                System.out.println();
+                System.out.println(">¿QUE DESEA HACER?");
+                System.out.println();
+                optionsTransaction.clear();
+                if (((Administrator) user).isIsSuperAdmin() || ((Administrator) user).permissions.contains(Permissions.READ) && ((Administrator) user).permissions.contains(Permissions.DELETE) && ((Administrator) user).permissions.contains(Permissions.WRITE)) {
+                    optionsTransaction.add("PRESTAR UN LIBRO");
+                    optionsTransaction.add("DEVOLVER UN LIBRO");
+                    optionsTransaction.add("VER TRANSACCIONES");
+                    optionsTransaction.add("SALIR DEL MENU TRANSACCIONES");
+                } else {
+                    if (((Administrator) user).permissions.contains(Permissions.WRITE)) {
+                        optionsTransaction.add("PRESTAR UN LIBRO");
+                        optionsTransaction.add("DEVOLVER UN LIBRO");
+                    }
+                    if (((Administrator) user).permissions.contains(Permissions.READ)) {
+                        optionsTransaction.add("VER TRANSACCIONES");
+                    }
+                    optionsTransaction.add("SALIR DEL MENU TRANSACCIONES");
+                }
+                Menu.printOptions(optionsTransaction);
+                ConsoleReader reader = new ConsoleReader();
+                IntValidator validatorOption = value -> value < optionsTransaction.size();
+                opc = reader.readInteger(">SELECCIONA OPCION", validatorOption);
+                if (opc >= 1 && opc <= optionsTransaction.size()) {
+                    String selectedOption = optionsTransaction.get(opc - 1);
+                    switch (selectedOption) {
+                        case "PRESTAR UN LIBRO" -> {
+                            System.out.println();
+                            borrowedBook();
+                        }
+                        case "DEVOLVER UN LIBRO" -> {
+                            System.out.println();
+                            returnBook();
+                        }
+                        case "VER TRANSACCIONES" -> {
+                            System.out.println();
+                            reportMovement();
+                        }
+                    }
+                } else {
+                    System.out.println("OPCION NO VALIDA");
+                }
+            } while (!optionsTransaction.get(opc - 1).equals("SALIR DEL MENU TRANSACCIONES"));
+        }
+    }

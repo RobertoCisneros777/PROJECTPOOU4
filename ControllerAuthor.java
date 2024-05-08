@@ -7,11 +7,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
 
-class ControllerAuthor{
+class ControllerAuthor implements Controller {
     static ArrayList<Author> authors = new ArrayList<>();
-    public static void addAuthor(Author author){
-        authors.add(author);
-    }
     public static void createAuthor() throws ParseException {
         Profile profile = new Profile();
         Author author;
@@ -109,5 +106,64 @@ class ControllerAuthor{
     public static void editAuthorBirthdate(int editIndex, Date birthdate){
         authors.get(editIndex).profile.birthdate=birthdate;
         System.out.println("FECHA DE NACIMIENTO EDITADA CON EXITO");
+    }
+
+    @Override
+    public void execute(User user) throws ParseException {
+        ArrayList<String> optionsAuthors = new ArrayList<>();
+        int opcAuthor;
+        do {
+            System.out.println();
+            System.out.println("-MENU AUTORES- ");
+            System.out.println();
+            System.out.println(">¿QUE DESEA HACER?");
+            optionsAuthors.clear();
+            if (((Administrator) user).isIsSuperAdmin() || ((Administrator) user).permissions.contains(Permissions.READ) && ((Administrator) user).permissions.contains(Permissions.DELETE) && ((Administrator) user).permissions.contains(Permissions.WRITE)) {
+                optionsAuthors.add("AÑADIR AUTOR");
+                optionsAuthors.add("EDITAR AUTOR");
+                optionsAuthors.add("MOSTRAR AUTORES");
+                optionsAuthors.add("ELIMINAR AUTOR");
+                optionsAuthors.add("SALIR DEL MENU AUTORES");
+            } else {
+                if (((Administrator) user).permissions.contains(Permissions.WRITE)) {
+                    optionsAuthors.add("AÑADIR AUTOR");
+                    optionsAuthors.add("EDITAR AUTOR");
+                }
+                if (((Administrator) user).permissions.contains(Permissions.READ)) {
+                    optionsAuthors.add("MOSTRAR AUTORES");
+                }
+                if (((Administrator) user).permissions.contains(Permissions.DELETE)) {
+                    optionsAuthors.add("ELIMINAR AUTOR");
+                }
+                optionsAuthors.add("SALIR DEL MENU AUTORES");
+            }
+            Menu.printOptions(optionsAuthors);
+            ConsoleReader reader = new ConsoleReader();
+            IntValidator validatorOption = value -> value < optionsAuthors.size();
+            opcAuthor = reader.readInteger(">SELECCIONA OPCION", validatorOption);
+            if (opcAuthor >= 1 && opcAuthor <= optionsAuthors.size()) {
+                String selectedOptionAuthor = optionsAuthors.get(opcAuthor - 1);
+                switch (selectedOptionAuthor) {
+                    case "AÑADIR AUTOR" -> {
+                        System.out.println();
+                        createAuthor();
+                    }
+                    case "EDITAR AUTOR" -> {
+                        System.out.println();
+                        editAuthor();
+                    }
+                    case "MOSTRAR AUTORES" -> {
+                        System.out.println();
+                        readerAuthors();
+                    }
+                    case "ELIMINAR AUTOR" -> {
+                        System.out.println();
+                        deleteAuthor();
+                    }
+                }
+            } else {
+                System.out.println("OPCION NO VALIDA");
+            }
+        } while (!optionsAuthors.get(opcAuthor - 1).equals("SALIR DEL MENU AUTORES"));
     }
 }
