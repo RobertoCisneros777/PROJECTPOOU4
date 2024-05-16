@@ -4,7 +4,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-class Menu implements Controller {
+class Menu {
     static HashMap <Integer, MenuOption> menuItems = new HashMap<>();
     public static void menu (User user) throws ParseException {
         ConsoleReader reader = new ConsoleReader();
@@ -116,6 +116,4 @@ class Menu implements Controller {
     }
     static void addMenuItem (int key, MenuOption menuOption){menuItems.put(key, menuOption);
     }
-    @Override
-    public void execute(User user) throws ParseException {}
 }
